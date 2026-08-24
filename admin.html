@@ -675,26 +675,28 @@ function confirmRetake() {
   });
 }
 
-// ── HTTP helpers ──────────────────────────────────────────────
-// All calls go through GET to avoid CORS preflight issues with GAS.
-// POST payloads are encoded as a 'payload' query parameter on doGet.
-function post_(body) {
-  var url = SCRIPT_URL + '?payload=' + encodeURIComponent(JSON.stringify(body)) + '&_=' + Date.now();
-  return fetch(url, { cache: 'no-store' })
-    .then(function(r) { return r.json(); })
-    .catch(function() {
-      return new Promise(function(res) { setTimeout(res, 700); })
-        .then(function() {
-          return fetch(url, { cache: 'no-store' }).then(function(r) { return r.json(); });
-        });
-    });
+// ── HTTP helpers (JSONP — only reliable cross-origin method for GAS) ──
+function jsonp_(params) {
+  return new Promise(function(resolve, reject) {
+    var cbName = 'cb_' + Date.now() + '_' + Math.floor(Math.random() * 9999);
+    var script = document.createElement('script');
+    var timer  = setTimeout(function() { cleanup(); reject(new Error('Timeout')); }, 15000);
+    window[cbName] = function(data) { cleanup(); resolve(data); };
+    function cleanup() {
+      clearTimeout(timer);
+      delete window[cbName];
+      if (script.parentNode) script.parentNode.removeChild(script);
+    }
+    var qs = Object.keys(params).map(function(k) {
+      return k + '=' + encodeURIComponent(params[k]);
+    }).join('&');
+    script.src = SCRIPT_URL + '?' + qs + '&callback=' + cbName + '&_=' + Date.now();
+    script.onerror = function() { cleanup(); reject(new Error('Script load failed')); };
+    document.head.appendChild(script);
+  });
 }
-
-function get_(params) {
-  var qs = Object.keys(params).map(function(k) { return k + '=' + encodeURIComponent(params[k]); }).join('&');
-  return fetch(SCRIPT_URL + '?' + qs + '&_=' + Date.now(), { cache: 'no-store' })
-    .then(function(r) { return r.json(); });
-}
+function post_(body) { return jsonp_({ payload: JSON.stringify(body) }); }
+function get_(params) { return jsonp_(params); }
 
 function esc_(str) {
   return (str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
