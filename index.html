@@ -306,6 +306,21 @@ const VERSIONS = {
 
 const SECTION_NAMES = { '1':'ISO 22000', '2':'HACCP', '3':'Hazards & Controls', '4':'Monitoring & CA' };
 
+// ── JSONP helper (avoids GAS CORS issues) ─────────────────────
+function jsonp_(params) {
+  return new Promise(function(resolve, reject) {
+    const cbName = 'cb_' + Date.now() + '_' + Math.floor(Math.random()*9999);
+    const script = document.createElement('script');
+    const timer  = setTimeout(function() { cleanup(); reject(new Error('Timeout')); }, 15000);
+    window[cbName] = function(data) { cleanup(); resolve(data); };
+    function cleanup() { clearTimeout(timer); delete window[cbName]; if(script.parentNode) script.parentNode.removeChild(script); }
+    const qs = Object.keys(params).map(k => k + '=' + encodeURIComponent(params[k])).join('&');
+    script.src = SCRIPT_URL + '?' + qs + '&callback=' + cbName + '&_=' + Date.now();
+    script.onerror = function() { cleanup(); reject(new Error('Script load failed')); };
+    document.head.appendChild(script);
+  });
+}
+
 let state = {
   token:'', version:null, candidate:{}, isRetake:false,
   questions:[], sections:{}, currentSection:'1', currentQIndex:0,
@@ -326,8 +341,7 @@ let state = {
   goTo('screen-loading');
   document.getElementById('loadingMsg').textContent = 'Validating your assessment link…';
 
-  fetch(`${SCRIPT_URL}?action=validateToken&token=${encodeURIComponent(token)}&_=${Date.now()}`, { cache:'no-store' })
-    .then(r => r.json())
+  jsonp_({ action: 'validateToken', token: token })
     .then(data => {
       if (!data.valid) {
         const msgs = {
@@ -378,9 +392,7 @@ function startTest() {
   document.getElementById('loadingMsg').textContent = 'Loading your assessment questions…';
   goTo('screen-loading');
 
-  const url = `${SCRIPT_URL}?action=getQuestions&token=${encodeURIComponent(state.token)}&_=${Date.now()}`;
-  fetch(url, { cache:'no-store' })
-    .then(r => r.json())
+  jsonp_({ action: 'getQuestions', token: state.token })
     .then(data => {
       if (!data.success) throw new Error(data.error || 'Failed to load questions');
       state.questions = data.questions;
@@ -535,13 +547,19 @@ function submitTest(auto=false) {
     email:state.candidate.email, phone:state.candidate.phone,
     version:state.version, timeTaken, answers:state.answers, batchQIDs:state.batchQIDs
   };
-  const doPost = () => fetch(
-    `${SCRIPT_URL}?payload=${encodeURIComponent(JSON.stringify(payload))}&_=${Date.now()}`,
-    { cache: 'no-store' }
-  ).then(r => r.json());
+  const doJsonp = () => new Promise((resolve, reject) => {
+    const cbName = 'cb_' + Date.now() + '_' + Math.floor(Math.random()*9999);
+    const script = document.createElement('script');
+    const timer  = setTimeout(() => { cleanup(); reject(new Error('Timeout')); }, 15000);
+    window[cbName] = (data) => { cleanup(); resolve(data); };
+    function cleanup() { clearTimeout(timer); delete window[cbName]; if(script.parentNode) script.parentNode.removeChild(script); }
+    script.src = `${SCRIPT_URL}?payload=${encodeURIComponent(JSON.stringify(payload))}&callback=${cbName}&_=${Date.now()}`;
+    script.onerror = () => { cleanup(); reject(new Error('Script load failed')); };
+    document.head.appendChild(script);
+  });
 
-  doPost()
-    .catch(() => new Promise(r => setTimeout(r, 700)).then(doPost))
+  doJsonp()
+    .catch(() => new Promise(r => setTimeout(r, 700)).then(doJsonp))
     .then(data => { if(data.success) showResults(data); else throw new Error(data.error); })
     .catch(() => showResults({ score:'?', maxScore:state.questions.length, pct:'?' }));
 }
