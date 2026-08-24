@@ -676,27 +676,24 @@ function confirmRetake() {
 }
 
 // ── HTTP helpers ──────────────────────────────────────────────
+// All calls go through GET to avoid CORS preflight issues with GAS.
+// POST payloads are encoded as a 'payload' query parameter on doGet.
 function post_(body) {
-  return fetch(SCRIPT_URL, {
-    method:  'POST',
-    headers: { 'Content-Type':'application/x-www-form-urlencoded' },
-    body:    'payload=' + encodeURIComponent(JSON.stringify(body))
-  }).then(function(r){ return r.json(); })
+  var url = SCRIPT_URL + '?payload=' + encodeURIComponent(JSON.stringify(body)) + '&_=' + Date.now();
+  return fetch(url, { cache: 'no-store' })
+    .then(function(r) { return r.json(); })
     .catch(function() {
-      return new Promise(function(res){ setTimeout(res, 600); })
+      return new Promise(function(res) { setTimeout(res, 700); })
         .then(function() {
-          return fetch(SCRIPT_URL, {
-            method:  'POST',
-            headers: { 'Content-Type':'application/x-www-form-urlencoded' },
-            body:    'payload=' + encodeURIComponent(JSON.stringify(body))
-          }).then(function(r){ return r.json(); });
+          return fetch(url, { cache: 'no-store' }).then(function(r) { return r.json(); });
         });
     });
 }
 
 function get_(params) {
-  var qs = Object.keys(params).map(function(k){ return k+'='+encodeURIComponent(params[k]); }).join('&');
-  return fetch(SCRIPT_URL+'?'+qs+'&_='+Date.now(), { cache:'no-store' }).then(function(r){ return r.json(); });
+  var qs = Object.keys(params).map(function(k) { return k + '=' + encodeURIComponent(params[k]); }).join('&');
+  return fetch(SCRIPT_URL + '?' + qs + '&_=' + Date.now(), { cache: 'no-store' })
+    .then(function(r) { return r.json(); });
 }
 
 function esc_(str) {
