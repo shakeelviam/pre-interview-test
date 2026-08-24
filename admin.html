@@ -590,18 +590,19 @@ function loadCandidates() {
       return;
     }
 
-    var rows = d.candidates.map(function(c) {
+    // Store candidates globally so onclick can reference by index (avoids HTML attribute escaping issues)
+  window._candidateStore = d.candidates;
+
+  var rows = d.candidates.map(function(c, idx) {
       var verBadge  = '<span class="ver-badge-'+c.version+'">' + c.version + '</span>';
       var stBadge   = statusBadge_(c.status);
       var scoreHtml = c.pct !== undefined && c.pct !== ''
         ? c.score + '/' + c.maxScore +
           ' <div class="score-bar-wrap"><div class="score-bar" style="width:'+c.pct+'%"></div></div>'
         : '—';
-      var actions   = '<button class="btn-sm-outline" style="margin-right:6px;" onclick="openDetail(' +
-        JSON.stringify(c).replace(/"/g,'&quot;') + ')"><i class="fa fa-eye me-1"></i>View</button>';
+      var actions = '<button class="btn-sm-outline" style="margin-right:6px;" onclick="openDetail('+idx+')"><i class="fa fa-eye me-1"></i>View</button>';
       if (c.status === 'Completed') {
-        actions += '<button class="btn-sm-outline" onclick="openRetake(' +
-          JSON.stringify(c).replace(/"/g,'&quot;') + ')">Retake</button>';
+        actions += ' <button class="btn-sm-outline" onclick="openRetakeByIdx('+idx+')">Retake</button>';
       }
       return '<tr>' +
         '<td><strong style="color:var(--dark);">' + esc_(c.name) + '</strong><br><small style="color:#aaa;">' + esc_(c.email) + '</small></td>' +
@@ -778,7 +779,9 @@ function esc_(str) {
 <script>
 var detailTarget = null;
 
-function openDetail(candidate) {
+function openDetail(idx) {
+  var candidate = (window._candidateStore || [])[idx];
+  if (!candidate) return;
   detailTarget = candidate;
 
   document.getElementById('detailModalName').textContent = candidate.name;
@@ -859,6 +862,11 @@ function openDetail(candidate) {
   }
 
   new bootstrap.Modal(document.getElementById('detailModal')).show();
+}
+
+function openRetakeByIdx(idx) {
+  var candidate = (window._candidateStore || [])[idx];
+  if (candidate) openRetake(candidate);
 }
 
 function openRetakeFromDetail() {
