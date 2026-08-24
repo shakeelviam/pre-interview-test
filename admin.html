@@ -597,9 +597,10 @@ function loadCandidates() {
         ? c.score + '/' + c.maxScore +
           ' <div class="score-bar-wrap"><div class="score-bar" style="width:'+c.pct+'%"></div></div>'
         : '—';
-      var actions   = '';
+      var actions   = '<button class="btn-sm-outline" style="margin-right:6px;" onclick="openDetail(' +
+        JSON.stringify(c).replace(/"/g,'&quot;') + ')"><i class="fa fa-eye me-1"></i>View</button>';
       if (c.status === 'Completed') {
-        actions = '<button class="btn-sm-outline" onclick="openRetake(' +
+        actions += '<button class="btn-sm-outline" onclick="openRetake(' +
           JSON.stringify(c).replace(/"/g,'&quot;') + ')">Retake</button>';
       }
       return '<tr>' +
@@ -700,6 +701,169 @@ function get_(params) { return jsonp_(params); }
 
 function esc_(str) {
   return (str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+</script>
+
+<!-- ══ DETAIL MODAL ══════════════════════════════════════════ -->
+<div class="modal fade" id="detailModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content" style="border-radius:14px;overflow:hidden;">
+      <div class="modal-header" style="background:var(--dark);color:#fff;border:none;padding:20px 28px;">
+        <div>
+          <h5 class="modal-title fw-bold mb-0" id="detailModalName"></h5>
+          <div style="font-size:.8rem;opacity:.7;margin-top:2px;" id="detailModalMeta"></div>
+        </div>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-0" style="max-height:80vh;overflow-y:auto;">
+
+        <!-- Summary strip -->
+        <div style="background:var(--light);border-bottom:1px solid #dde8e2;padding:18px 28px;display:flex;gap:32px;flex-wrap:wrap;">
+          <div><div style="font-size:.72rem;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.5px;">Total Score</div>
+            <div style="font-size:1.6rem;font-weight:900;color:var(--dark);" id="dScore"></div></div>
+          <div><div style="font-size:.72rem;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.5px;">Percentage</div>
+            <div style="font-size:1.6rem;font-weight:900;color:var(--dark);" id="dPct"></div></div>
+          <div><div style="font-size:.72rem;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.5px;">Time Taken</div>
+            <div style="font-size:1.6rem;font-weight:900;color:var(--dark);" id="dTime"></div></div>
+          <div><div style="font-size:.72rem;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.5px;">Version</div>
+            <div style="font-size:1.6rem;font-weight:900;color:var(--dark);" id="dVersion"></div></div>
+          <div><div style="font-size:.72rem;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.5px;">Date</div>
+            <div style="font-size:1.6rem;font-weight:900;color:var(--dark);" id="dDate"></div></div>
+        </div>
+
+        <!-- Section breakdown -->
+        <div style="padding:18px 28px;border-bottom:1px solid #eee;">
+          <div style="font-size:.82rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;">Section Breakdown</div>
+          <div id="dSections" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;"></div>
+        </div>
+
+        <!-- Per-question answers -->
+        <div style="padding:18px 28px;">
+          <div style="font-size:.82rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-bottom:16px;">Question-by-Question Breakdown</div>
+          <div id="dQuestions"></div>
+        </div>
+
+      </div>
+      <div class="modal-footer border-0 px-4 pb-4 pt-0" style="justify-content:flex-start;gap:10px;">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button class="btn-primary-brand" id="btnDetailRetake" onclick="openRetakeFromDetail()">
+          <i class="fa fa-rotate-left me-2"></i>Approve Retake
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.q-detail-card {
+  border:1.5px solid #eee; border-radius:10px; padding:14px 16px; margin-bottom:10px;
+}
+.q-detail-card.correct { border-color:#c3e6cb; background:#f6fff9; }
+.q-detail-card.wrong   { border-color:#f5c6cb; background:#fff6f6; }
+.q-num    { font-size:.72rem; font-weight:700; color:#aaa; margin-bottom:6px; }
+.q-text-d { font-size:.88rem; font-weight:600; color:#222; margin-bottom:10px; line-height:1.5; }
+.q-opts   { display:flex; flex-direction:column; gap:4px; }
+.q-opt    { font-size:.82rem; padding:5px 10px; border-radius:6px; color:#555; }
+.q-opt.submitted-correct { background:#d4edda; color:#155724; font-weight:700; }
+.q-opt.submitted-wrong   { background:#f8d7da; color:#721c24; font-weight:700; }
+.q-opt.correct-ans       { background:#d4edda; color:#155724; font-weight:700; }
+.result-icon { float:right; font-size:1rem; margin-top:-2px; }
+.section-score-card { background:#fff; border:1.5px solid #eee; border-radius:10px; padding:14px 16px; }
+.section-score-card .ss-name  { font-size:.8rem; font-weight:700; color:var(--dark); margin-bottom:6px; }
+.section-score-card .ss-score { font-size:1.3rem; font-weight:900; color:var(--green); }
+.section-score-card .ss-bar-wrap { background:#eee; border-radius:4px; height:6px; margin-top:6px; }
+.section-score-card .ss-bar     { height:6px; border-radius:4px; background:var(--green); }
+</style>
+
+<script>
+var detailTarget = null;
+
+function openDetail(candidate) {
+  detailTarget = candidate;
+
+  document.getElementById('detailModalName').textContent = candidate.name;
+  document.getElementById('detailModalMeta').textContent =
+    'Civil ID: ' + candidate.civilId + '  ·  ' + candidate.email +
+    (candidate.phone ? '  ·  ' + candidate.phone : '');
+
+  document.getElementById('dScore').textContent   = candidate.score + ' / ' + candidate.maxScore;
+  document.getElementById('dPct').textContent     = candidate.pct + '%';
+  document.getElementById('dTime').textContent    = candidate.timeTaken || '—';
+  document.getElementById('dVersion').textContent = candidate.version;
+  document.getElementById('dDate').textContent    = (candidate.timestamp || '').split(' ')[0];
+
+  // Section breakdown
+  var sNames = { s1:'ISO 22000', s2:'HACCP Principles', s3:'Food Safety Hazards', s4:'Monitoring & CA' };
+  var sEl = document.getElementById('dSections');
+  sEl.innerHTML = '';
+  ['s1','s2','s3','s4'].forEach(function(k) {
+    var val   = candidate[k] || '0/0';
+    var parts = val.split('/');
+    var got   = parseInt(parts[0]) || 0;
+    var tot   = parseInt(parts[1]) || 0;
+    var pct   = tot > 0 ? Math.round((got/tot)*100) : 0;
+    sEl.innerHTML += '<div class="section-score-card">' +
+      '<div class="ss-name">' + sNames[k] + '</div>' +
+      '<div class="ss-score">' + val + '</div>' +
+      '<div style="font-size:.75rem;color:#aaa;">' + pct + '%</div>' +
+      '<div class="ss-bar-wrap"><div class="ss-bar" style="width:' + pct + '%"></div></div>' +
+      '</div>';
+  });
+
+  // Retake button visibility
+  document.getElementById('btnDetailRetake').style.display =
+    candidate.status === 'Completed' ? 'inline-flex' : 'none';
+
+  // Per-question breakdown
+  var qEl = document.getElementById('dQuestions');
+  qEl.innerHTML = '';
+
+  var details = candidate.questionDetails || [];
+  if (!details.length) {
+    qEl.innerHTML = '<p class="text-muted" style="font-size:.85rem;">Question details not available for this attempt.</p>';
+  } else {
+    // Group by section
+    var sections = {};
+    details.forEach(function(q) {
+      if (!sections[q.sectionName]) sections[q.sectionName] = [];
+      sections[q.sectionName].push(q);
+    });
+
+    var qNum = 1;
+    Object.keys(sections).forEach(function(sName) {
+      qEl.innerHTML += '<div style="font-size:.78rem;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.5px;margin:16px 0 8px;">' + sName + '</div>';
+      sections[sName].forEach(function(q) {
+        var isCorrect = q.isCorrect;
+        var card = '<div class="q-detail-card ' + (isCorrect ? 'correct' : 'wrong') + '">';
+        card += '<div class="q-num">Q' + qNum + ' · ' + (q.difficulty || '') +
+          '<span class="result-icon">' + (isCorrect ? '✅' : '❌') + '</span></div>';
+        card += '<div class="q-text-d">' + esc_(q.question) + '</div>';
+        card += '<div class="q-opts">';
+        ['A','B','C','D'].forEach(function(key) {
+          var optText  = q.options[key] || '';
+          var cls      = 'q-opt';
+          var prefix   = key + '. ';
+          if (key === q.correct && key === q.submitted) cls += ' submitted-correct';
+          else if (key === q.submitted && key !== q.correct) cls += ' submitted-wrong';
+          else if (key === q.correct) cls += ' correct-ans';
+          var label = '';
+          if (key === q.submitted) label += ' <strong>(Your answer)</strong>';
+          if (key === q.correct && key !== q.submitted) label += ' <strong>(Correct answer)</strong>';
+          card += '<div class="' + cls + '">' + prefix + esc_(optText) + label + '</div>';
+        });
+        card += '</div></div>';
+        qEl.innerHTML += card;
+        qNum++;
+      });
+    });
+  }
+
+  new bootstrap.Modal(document.getElementById('detailModal')).show();
+}
+
+function openRetakeFromDetail() {
+  bootstrap.Modal.getInstance(document.getElementById('detailModal')).hide();
+  setTimeout(function() { openRetake(detailTarget); }, 300);
 }
 </script>
 </body>
