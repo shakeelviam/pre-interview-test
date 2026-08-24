@@ -535,11 +535,13 @@ function submitTest(auto=false) {
     email:state.candidate.email, phone:state.candidate.phone,
     version:state.version, timeTaken, answers:state.answers, batchQIDs:state.batchQIDs
   };
-  const body = `payload=${encodeURIComponent(JSON.stringify(payload))}`;
-  const doPost = () => fetch(SCRIPT_URL,{ method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body }).then(r=>r.json());
+  const doPost = () => fetch(
+    `${SCRIPT_URL}?payload=${encodeURIComponent(JSON.stringify(payload))}&_=${Date.now()}`,
+    { cache: 'no-store' }
+  ).then(r => r.json());
 
   doPost()
-    .catch(() => new Promise(r=>setTimeout(r,600)).then(doPost))
+    .catch(() => new Promise(r => setTimeout(r, 700)).then(doPost))
     .then(data => { if(data.success) showResults(data); else throw new Error(data.error); })
     .catch(() => showResults({ score:'?', maxScore:state.questions.length, pct:'?' }));
 }
