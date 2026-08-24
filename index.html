@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Food Safety & Quality Officer — Pre-Interview Assessment</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    :root {
+      --brand-green:  #1a6b3a;
+      --brand-dark:   #0f3d22;
+      --brand-light:  #e8f5ed;
+      --brand-accent: #f4a61d;
+      --brand-red:    #c0392b;
+    }
+
+    body { background: #f0f4f2; font-family: 'Segoe UI', sans-serif; }
+
+    /* ── Screens ───────────────────────────────────────────── */
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    /* ── Header bar ─────────────────────────────────────────── */
+    .top-bar {
+      background: var(--brand-dark);
+      color: #fff;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,.3);
+    }
+    .top-bar .logo { width: 40px; height: 40px; background: var(--brand-accent);
+      border-radius: 8px; display: flex; align-items: center; justify-content: center;
+      font-weight: 900; font-size: 18px; color: #fff; flex-shrink: 0; }
+    .top-bar h1 { font-size: 1rem; font-weight: 700; margin: 0; line-height: 1.3; }
+    .top-bar p  { font-size: .75rem; margin: 0; opacity: .75; }
+
+    /* ── Timer ──────────────────────────────────────────────── */
+    #timerBadge {
+      margin-left: auto;
+      background: var(--brand-accent);
+      color: #1a1a1a;
+      font-weight: 800;
+      font-size: 1.15rem;
+      padding: 6px 14px;
+      border-radius: 8px;
+      letter-spacing: 1px;
+      min-width: 80px;
+      text-align: center;
+      display: none;
+    }
+    #timerBadge.danger { background: var(--brand-red); color: #fff; animation: pulse 1s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.65} }
+
+    /* ── Card wrapper ───────────────────────────────────────── */
+    .card-wrap { max-width: 780px; margin: 30px auto; padding: 0 16px 50px; }
+
+    .main-card {
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 4px 24px rgba(0,0,0,.09);
+      overflow: hidden;
+    }
+    .card-head {
+      background: linear-gradient(135deg, var(--brand-green), var(--brand-dark));
+      color: #fff;
+      padding: 28px 32px;
+    }
+    .card-head h2 { font-weight: 700; margin: 0 0 4px; }
+    .card-head p  { margin: 0; opacity: .85; font-size: .9rem; }
+    .card-body-inner { padding: 28px 32px; }
+
+    /* ── Version cards ──────────────────────────────────────── */
+    .version-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap: 16px; margin-top: 20px; }
+    .version-card {
+      border: 2px solid #ddd;
+      border-radius: 12px;
+      padding: 20px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .version-card:hover, .version-card.selected { border-color: var(--brand-green); background: var(--brand-light); }
+    .version-card .vc-icon { font-size: 2rem; margin-bottom: 8px; }
+    .version-card .vc-name { font-weight: 700; color: var(--brand-dark); font-size: 1rem; }
+    .version-card .vc-meta { font-size: .8rem; color: #666; margin-top: 4px; }
+    .version-card.selected .vc-badge {
+      display: inline-block;
+      background: var(--brand-green);
+      color: #fff;
+      font-size: .7rem;
+      padding: 2px 8px;
+      border-radius: 20px;
+      margin-top: 6px;
+    }
+
+    /* ── Form fields ─────────────────────────────────────────── */
+    .form-label { font-weight: 600; color: #333; font-size: .9rem; }
+    .form-control:focus { border-color: var(--brand-green); box-shadow: 0 0 0 .2rem rgba(26,107,58,.2); }
+
+    /* ── Instructions ───────────────────────────────────────── */
+    .instr-list { list-style: none; padding: 0; }
+    .instr-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: .92rem;
+      color: #444;
+    }
+    .instr-list li:last-child { border: none; }
+    .instr-list li .icon { color: var(--brand-green); font-size: 1rem; margin-top: 2px; flex-shrink: 0; }
+
+    .version-pill {
+      display: inline-block;
+      background: var(--brand-accent);
+      color: #1a1a1a;
+      font-weight: 700;
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: .85rem;
+    }
+
+    /* ── Section progress ───────────────────────────────────── */
+    .section-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
+    .section-tab {
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: .8rem;
+      font-weight: 600;
+      background: #eee;
+      color: #888;
+      border: none;
+      cursor: default;
+    }
+    .section-tab.active   { background: var(--brand-green); color: #fff; }
+    .section-tab.done     { background: var(--brand-light); color: var(--brand-green); border: 1px solid var(--brand-green); }
+
+    /* ── Question card ──────────────────────────────────────── */
+    .q-counter {
+      font-size: .82rem;
+      color: #888;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    .q-text {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-bottom: 20px;
+      line-height: 1.55;
+    }
+    .options-list { display: flex; flex-direction: column; gap: 10px; }
+    .option-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 13px 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      background: #fff;
+      cursor: pointer;
+      font-size: .95rem;
+      color: #333;
+      text-align: left;
+      transition: all .15s;
+      width: 100%;
+    }
+    .option-btn:hover { border-color: var(--brand-green); background: var(--brand-light); }
+    .option-btn.selected { border-color: var(--brand-green); background: var(--brand-light); color: var(--brand-dark); font-weight: 600; }
+    .option-btn .opt-key {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #eee;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: .85rem;
+      flex-shrink: 0;
+    }
+    .option-btn.selected .opt-key { background: var(--brand-green); color: #fff; }
+
+    /* ── Progress bar ───────────────────────────────────────── */
+    .q-progress { margin-bottom: 20px; }
+    .q-progress .label { display: flex; justify-content: space-between; font-size: .78rem; color: #888; margin-bottom: 4px; }
+    .progress { height: 6px; border-radius: 3px; background: #e8e8e8; }
+    .progress-bar { background: var(--brand-green); border-radius: 3px; transition: width .3s; }
+
+    /* ── Nav buttons ─────────────────────────────────────────── */
+    .nav-btns { display: flex; justify-content: space-between; align-items: center; margin-top: 28px; gap: 12px; }
+    .btn-brand { background: var(--brand-green); color: #fff; border: none; padding: 11px 28px; border-radius: 8px; font-weight: 700; font-size: .95rem; cursor: pointer; transition: background .2s; }
+    .btn-brand:hover { background: var(--brand-dark); }
+    .btn-brand:disabled { background: #ccc; cursor: not-allowed; }
+    .btn-outline-brand { background: transparent; color: var(--brand-green); border: 2px solid var(--brand-green); padding: 11px 28px; border-radius: 8px; font-weight: 700; font-size: .95rem; cursor: pointer; transition: all .2s; }
+    .btn-outline-brand:hover { background: var(--brand-green); color: #fff; }
+
+    /* ── Skip nav ────────────────────────────────────────────── */
+    .q-nav-dots { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px; }
+    .q-dot {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: #e8e8e8;
+      border: none;
+      cursor: pointer;
+      font-size: .7rem;
+      font-weight: 700;
+      color: #888;
+      display: flex; align-items: center; justify-content: center;
+      transition: all .15s;
+    }
+    .q-dot.answered  { background: var(--brand-green); color: #fff; }
+    .q-dot.current   { border: 2px solid var(--brand-green); color: var(--brand-green); }
+
+    /* ── Result screen ──────────────────────────────────────── */
+    .score-ring {
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      border: 10px solid var(--brand-light);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+      position: relative;
+    }
+    .score-ring .score-num { font-size: 2.4rem; font-weight: 900; color: var(--brand-dark); line-height: 1; }
+    .score-ring .score-pct { font-size: .9rem; color: #888; font-weight: 600; }
+    .score-ring .ring-border {
+      position: absolute;
+      inset: -10px;
+      border-radius: 50%;
+      border: 10px solid var(--brand-green);
+      clip-path: inset(0 0 50% 0); /* JS will update dynamically */
+    }
+
+    .result-info { text-align: center; margin-bottom: 24px; }
+    .result-info h3 { font-weight: 800; color: var(--brand-dark); }
+    .result-info p  { color: #666; font-size: .9rem; }
+
+    .alert-submitted {
+      background: var(--brand-light);
+      border: 1.5px solid var(--brand-green);
+      border-radius: 10px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--brand-dark);
+      font-size: .9rem;
+    }
+
+    /* ── Spinner ─────────────────────────────────────────────── */
+    .spinner-wrap { text-align: center; padding: 60px; }
+    .spinner-wrap .spin { width: 48px; height: 48px; border: 5px solid #e0e0e0;
+      border-top-color: var(--brand-green); border-radius: 50%; animation: spin .8s linear infinite; margin: 0 auto 16px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Alerts ──────────────────────────────────────────────── */
+    .alert-err { background: #fdf0ef; border: 1.5px solid var(--brand-red); color: var(--brand-red);
+      border-radius: 8px; padding: 12px 16px; font-size: .88rem; margin-top: 16px; display: none; }
+
+    /* ── Warning modal ───────────────────────────────────────── */
+    .modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.55);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal-box { background: #fff; border-radius: 14px; padding: 32px; max-width: 420px; width: 90%; text-align: center; }
+    .modal-box h4 { font-weight: 800; color: var(--brand-red); margin-bottom: 12px; }
+    .modal-box p  { color: #555; margin-bottom: 24px; font-size: .92rem; }
+
+    /* ── Blocked screen ──────────────────────────────────────── */
+    .blocked-wrap { text-align: center; padding: 40px 20px; }
+    .blocked-icon { font-size: 4rem; color: var(--brand-red); margin-bottom: 16px; }
+
+    @media(max-width:560px) {
+      .card-body-inner { padding: 20px 18px; }
+      .card-head { padding: 20px 18px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ TOP BAR ═══════════════════════════════════════════════ -->
+<div class="top-bar">
+  <div class="logo">FS</div>
+  <div>
+    <h1>Maya Tex Restaurants</h1>
+    <p>Food Safety &amp; Quality Officer Assessment</p>
+  </div>
+  <div id="timerBadge"><i class="fa fa-clock me-1"></i><span id="timerDisplay">60:00</span></div>
+</div>
+
+<!-- ══ SCREENS ═══════════════════════════════════════════════ -->
+<div class="card-wrap">
+
+  <!-- ── SCREEN: Version Select ─────────────────────────────── -->
+  <div id="screen-version" class="screen active">
+    <div class="main-card">
+      <div class="card-head">
+        <h2><i class="fa fa-shield-halved me-2"></i>Welcome</h2>
+        <p>Food Safety &amp; Quality Officer — Pre-Interview Assessment</p>
+      </div>
+      <div class="card-body-inner">
+        <p class="text-muted mb-1" style="font-size:.9rem;">Please select the assessment version:</p>
+        <div class="version-cards">
+          <div class="version-card" onclick="selectVersion('quick')">
+            <div class="vc-icon">⚡</div>
+            <div class="vc-name">Quick Eval</div>
+            <div class="vc-meta">20 Questions · 20 Minutes</div>
+            <div class="vc-meta mt-1" style="color:#999;">In-office, pre-interview</div>
+            <span class="vc-badge" style="display:none;">Selected ✓</span>
+          </div>
+          <div class="version-card" onclick="selectVersion('standard')">
+            <div class="vc-icon">📋</div>
+            <div class="vc-name">Standard</div>
+            <div class="vc-meta">30 Questions · 45 Minutes</div>
+            <div class="vc-meta mt-1" style="color:#999;">Scheduled assessment</div>
+            <span class="vc-badge" style="display:none;">Selected ✓</span>
+          </div>
+          <div class="version-card" onclick="selectVersion('full')">
+            <div class="vc-icon">🏆</div>
+            <div class="vc-name">Full Evaluation</div>
+            <div class="vc-meta">40 Questions · 60 Minutes</div>
+            <div class="vc-meta mt-1" style="color:#999;">Thorough / final round</div>
+            <span class="vc-badge" style="display:none;">Selected ✓</span>
+          </div>
+        </div>
+        <div class="mt-4 text-end">
+          <button class="btn-brand" id="btnVersionNext" onclick="goToRegistration()" disabled>
+            Continue <i class="fa fa-arrow-right ms-1"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SCREEN: Registration ───────────────────────────────── -->
+  <div id="screen-register" class="screen">
+    <div class="main-card">
+      <div class="card-head">
+        <h2><i class="fa fa-user-pen me-2"></i>Candidate Details</h2>
+        <p>Please fill in your information accurately before starting the test.</p>
+      </div>
+      <div class="card-body-inner">
+        <div class="row g-3">
+          <div class="col-12">
+            <label class="form-label">Full Name <span class="text-danger">*</span></label>
+            <input type="text" id="regName" class="form-control" placeholder="As per Civil ID" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Civil ID Number <span class="text-danger">*</span></label>
+            <input type="text" id="regCivilId" class="form-control" placeholder="12 digit Civil ID" maxlength="12" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Email Address <span class="text-danger">*</span></label>
+            <input type="email" id="regEmail" class="form-control" placeholder="your@email.com" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Phone Number</label>
+            <input type="tel" id="regPhone" class="form-control" placeholder="+965 XXXX XXXX" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Assessment Date</label>
+            <input type="text" id="regDate" class="form-control" readonly />
+          </div>
+        </div>
+        <div id="regError" class="alert-err"></div>
+        <div class="mt-4 d-flex justify-content-between">
+          <button class="btn-outline-brand" onclick="goTo('screen-version')">
+            <i class="fa fa-arrow-left me-1"></i> Back
+          </button>
+          <button class="btn-brand" onclick="checkEligibility()">
+            Check &amp; Continue <i class="fa fa-arrow-right ms-1"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SCREEN: Blocked ────────────────────────────────────── -->
+  <div id="screen-blocked" class="screen">
+    <div class="main-card">
+      <div class="card-body-inner blocked-wrap">
+        <div class="blocked-icon"><i class="fa fa-ban"></i></div>
+        <h3 class="fw-bold text-danger">Assessment Already Completed</h3>
+        <p class="text-muted mt-2" style="max-width:420px;margin:0 auto;">
+          Our records show this Civil ID has already completed an assessment attempt.
+          If you believe this is an error or would like to request a retake, please contact HR directly.
+        </p>
+        <div class="mt-4">
+          <button class="btn-outline-brand" onclick="goTo('screen-register')">
+            <i class="fa fa-arrow-left me-1"></i> Back
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SCREEN: Instructions ───────────────────────────────── -->
+  <div id="screen-instructions" class="screen">
+    <div class="main-card">
+      <div class="card-head">
+        <h2><i class="fa fa-circle-info me-2"></i>Instructions</h2>
+        <p>Please read carefully before starting your assessment.</p>
+      </div>
+      <div class="card-body-inner">
+        <div class="mb-3">
+          <span class="version-pill" id="instrVersionLabel"></span>
+        </div>
+        <ul class="instr-list">
+          <li><i class="fa fa-clock icon"></i> <span>The timer starts immediately when you click <strong>Start Assessment</strong>. It cannot be paused.</span></li>
+          <li><i class="fa fa-layer-group icon"></i> <span>Questions are divided into <strong>4 sections</strong>: ISO 22000 Fundamentals, HACCP Principles, Food Safety Hazards, and Monitoring &amp; Corrective Action.</span></li>
+          <li><i class="fa fa-circle-dot icon"></i> <span>Each question has <strong>4 options</strong>. Select the best answer. You can change your answer within a section before moving to the next section.</span></li>
+          <li><i class="fa fa-forward icon"></i> <span>Use the question dots at the bottom to <strong>jump to any question</strong> within the current section. You cannot go back to a completed section.</span></li>
+          <li><i class="fa fa-hourglass-end icon"></i> <span>The test will <strong>auto-submit</strong> when time expires. Ensure a stable internet connection.</span></li>
+          <li><i class="fa fa-eye-slash icon"></i> <span>Your <strong>score will be shared with HR</strong>. Correct answers will not be displayed to you.</span></li>
+          <li><i class="fa fa-rotate-left icon"></i> <span>This is a <strong>one-attempt assessment</strong>. Retakes require HR approval and will present a different question set.</span></li>
+          <li><i class="fa fa-check-circle icon"></i> <span>There is <strong>no negative marking</strong>. Answer every question.</span></li>
+        </ul>
+        <div class="mt-4 d-flex justify-content-between">
+          <button class="btn-outline-brand" onclick="goTo('screen-register')">
+            <i class="fa fa-arrow-left me-1"></i> Back
+          </button>
+          <button class="btn-brand" onclick="startTest()">
+            <i class="fa fa-play me-1"></i> Start Assessment
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SCREEN: Loading ────────────────────────────────────── -->
+  <div id="screen-loading" class="screen">
+    <div class="main-card">
+      <div class="spinner-wrap">
+        <div class="spin"></div>
+        <p class="text-muted">Loading your assessment questions…</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SCREEN: Test ───────────────────────────────────────── -->
+  <div id="screen-test" class="screen">
+    <div class="main-card">
+      <div class="card-head" style="padding:18px 28px;">
+        <div class="section-tabs" id="sectionTabs"></div>
+        <div class="q-progress">
+          <div class="label">
+            <span id="progressLabel">Question 1 of 20</span>
+            <span id="progressPct">0% answered</span>
+          </div>
+          <div class="progress"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
+        </div>
+      </div>
+      <div class="card-body-inner">
+        <div class="q-counter" id="qCounter"></div>
+        <div class="q-text" id="qText"></div>
+        <div class="options-list" id="optionsList"></div>
+        <div class="q-nav-dots" id="qNavDots"></div>
+        <div class="nav-btns">
+          <button class="btn-outline-brand" id="btnPrev" onclick="prevQuestion()">
+            <i class="fa fa-arrow-left me-1"></i> Previous
+          </button>
+          <button class="btn-brand" id="btnNext" onclick="nextQuestion()">
+            Next <i class="fa fa-arrow-right ms-1"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SCREEN: Submitting ─────────────────────────────────── -->
+  <div id="screen-submitting" class="screen">
+    <div class="main-card">
+      <div class="spinner-wrap">
+        <div class="spin"></div>
+        <p class="text-muted">Submitting your assessment… please wait.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SCREEN: Results ───────────────────────────────────────── -->
+  <div id="screen-results" class="screen">
+    <div class="main-card">
+      <div class="card-head">
+        <h2><i class="fa fa-flag-checkered me-2"></i>Assessment Submitted</h2>
+        <p>Thank you for completing the Food Safety Assessment.</p>
+      </div>
+      <div class="card-body-inner">
+        <div class="result-info">
+          <div class="score-ring">
+            <div class="score-num" id="resultScore">—</div>
+            <div class="score-pct" id="resultPct">—</div>
+          </div>
+          <h3 id="resultName"></h3>
+          <p id="resultVersion"></p>
+        </div>
+        <div class="alert-submitted">
+          <i class="fa fa-circle-check fa-lg" style="color:var(--brand-green);flex-shrink:0;"></i>
+          <div>
+            <strong>Your results have been submitted to HR.</strong><br>
+            You will be contacted by the HR team regarding next steps. Correct answers are not displayed.
+          </div>
+        </div>
+        <div class="mt-4 text-center">
+          <p class="text-muted" style="font-size:.82rem;">
+            <i class="fa fa-info-circle me-1"></i>
+            If you have questions about this assessment, please contact HR at Maya Tex Restaurants.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /card-wrap -->
+
+<!-- ══ SUBMIT CONFIRM MODAL ════════════════════════════════════ -->
+<div class="modal-overlay" id="submitModal">
+  <div class="modal-box">
+    <h4><i class="fa fa-triangle-exclamation me-2"></i>Submit Assessment?</h4>
+    <p id="submitModalMsg">You have answered all questions. Are you ready to submit?</p>
+    <div class="d-flex gap-3 justify-content-center">
+      <button class="btn-outline-brand" onclick="closeModal()">Review Answers</button>
+      <button class="btn-brand" onclick="submitTest()">Submit Now</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════ SCRIPT ════════════════════════════════ -->
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID_HERE/exec';
+
+const VERSIONS = {
+  quick:    { label: 'Quick Eval (20 min)',   minutes: 20, perSection: 5  },
+  standard: { label: 'Standard (45 min)',     minutes: 45, perSection: 8  },
+  full:     { label: 'Full Evaluation (60 min)', minutes: 60, perSection: 10 }
+};
+
+const SECTION_NAMES = {
+  '1': 'ISO 22000 Fundamentals',
+  '2': 'HACCP Principles',
+  '3': 'Food Safety Hazards',
+  '4': 'Monitoring & Corrective Action'
+};
+
+// ── State ─────────────────────────────────────────────────────
+let state = {
+  version: null,
+  candidate: {},
+  isRetake: false,
+  questions: [],       // flat array of all questions
+  sections: {},        // { '1': [q,...], '2': [...], ... }
+  currentSection: '1',
+  currentQIndex: 0,    // index within current section
+  answers: {},         // { QID: 'A' }
+  batchQIDs: [],
+  timer: null,
+  secondsLeft: 0,
+  submitted: false
+};
+
+// ── Routing ───────────────────────────────────────────────────
+function goTo(screenId) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(screenId).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// ── Version select ────────────────────────────────────────────
+function selectVersion(v) {
+  state.version = v;
+  document.querySelectorAll('.version-card').forEach(c => {
+    c.classList.remove('selected');
+    c.querySelector('.vc-badge').style.display = 'none';
+  });
+  event.currentTarget.classList.add('selected');
+  event.currentTarget.querySelector('.vc-badge').style.display = 'inline-block';
+  document.getElementById('btnVersionNext').disabled = false;
+}
+
+function goToRegistration() {
+  document.getElementById('regDate').value = new Date().toLocaleDateString('en-GB');
+  goTo('screen-register');
+}
+
+// ── Registration & eligibility ────────────────────────────────
+function checkEligibility() {
+  const name    = document.getElementById('regName').value.trim();
+  const civilId = document.getElementById('regCivilId').value.trim();
+  const email   = document.getElementById('regEmail').value.trim();
+  const errEl   = document.getElementById('regError');
+  errEl.style.display = 'none';
+
+  if (!name || !civilId || !email) {
+    errEl.textContent = 'Please fill in all required fields (Name, Civil ID, Email).';
+    errEl.style.display = 'block';
+    return;
+  }
+  if (!/^\d{12}$/.test(civilId)) {
+    errEl.textContent = 'Civil ID must be exactly 12 digits.';
+    errEl.style.display = 'block';
+    return;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    errEl.textContent = 'Please enter a valid email address.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  state.candidate = {
+    name, civilId, email,
+    phone: document.getElementById('regPhone').value.trim(),
+    date:  document.getElementById('regDate').value
+  };
+
+  // Check eligibility via Apps Script
+  goTo('screen-loading');
+  fetch(`${SCRIPT_URL}?action=checkEligibility&civilId=${encodeURIComponent(civilId)}&_=${Date.now()}`, { cache: 'no-store' })
+    .then(r => r.json())
+    .then(data => {
+      if (!data.eligible) {
+        if (data.reason === 'already_attempted') {
+          goTo('screen-blocked');
+        } else {
+          showRegError(data.reason || 'Eligibility check failed.');
+          goTo('screen-register');
+        }
+        return;
+      }
+      state.isRetake = !!data.isRetake;
+      const vMeta = VERSIONS[state.version];
+      document.getElementById('instrVersionLabel').textContent = vMeta.label;
+      goTo('screen-instructions');
+    })
+    .catch(() => {
+      showRegError('Network error during eligibility check. Please try again.');
+      goTo('screen-register');
+    });
+}
+
+function showRegError(msg) {
+  const el = document.getElementById('regError');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+// ── Start Test ────────────────────────────────────────────────
+function startTest() {
+  goTo('screen-loading');
+  const url = `${SCRIPT_URL}?action=getQuestions&version=${state.version}&civilId=${encodeURIComponent(state.candidate.civilId)}&isRetake=${state.isRetake}&_=${Date.now()}`;
+
+  fetch(url, { cache: 'no-store' })
+    .then(r => r.json())
+    .then(data => {
+      if (!data.success) throw new Error(data.error || 'Failed to load questions');
+      state.questions  = data.questions;
+      state.batchQIDs  = data.batchQIDs;
+
+      // Organise into sections
+      state.sections = { '1': [], '2': [], '3': [], '4': [] };
+      data.questions.forEach(q => {
+        if (state.sections[q.section]) state.sections[q.section].push(q);
+      });
+
+      state.currentSection = '1';
+      state.currentQIndex  = 0;
+      state.answers        = {};
+      state.submitted      = false;
+
+      const mins = VERSIONS[state.version].minutes;
+      state.secondsLeft = mins * 60;
+
+      buildSectionTabs();
+      renderQuestion();
+      startTimer();
+      goTo('screen-test');
+    })
+    .catch(err => {
+      alert('Error loading questions: ' + err.message + '\nPlease refresh and try again.');
+      goTo('screen-instructions');
+    });
+}
+
+// ── Timer ─────────────────────────────────────────────────────
+function startTimer() {
+  document.getElementById('timerBadge').style.display = 'flex';
+  updateTimerDisplay();
+  state.timer = setInterval(() => {
+    state.secondsLeft--;
+    updateTimerDisplay();
+    if (state.secondsLeft <= 0) {
+      clearInterval(state.timer);
+      submitTest(true);
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(state.secondsLeft / 60).toString().padStart(2, '0');
+  const s = (state.secondsLeft % 60).toString().padStart(2, '0');
+  document.getElementById('timerDisplay').textContent = `${m}:${s}`;
+  const badge = document.getElementById('timerBadge');
+  if (state.secondsLeft <= 120) badge.classList.add('danger');
+  else badge.classList.remove('danger');
+}
+
+// ── Section Tabs ──────────────────────────────────────────────
+function buildSectionTabs() {
+  const container = document.getElementById('sectionTabs');
+  container.innerHTML = '';
+  ['1','2','3','4'].forEach(s => {
+    const btn = document.createElement('button');
+    btn.className = 'section-tab' + (s === state.currentSection ? ' active' : '');
+    btn.id = `stab-${s}`;
+    btn.textContent = SECTION_NAMES[s];
+    container.appendChild(btn);
+  });
+}
+
+function updateSectionTabs() {
+  ['1','2','3','4'].forEach(s => {
+    const btn = document.getElementById(`stab-${s}`);
+    if (!btn) return;
+    btn.className = 'section-tab';
+    if (s === state.currentSection) btn.classList.add('active');
+    else if (parseInt(s) < parseInt(state.currentSection)) btn.classList.add('done');
+  });
+}
+
+// ── Render question ───────────────────────────────────────────
+function renderQuestion() {
+  const sQuestions = state.sections[state.currentSection];
+  const q = sQuestions[state.currentQIndex];
+  if (!q) return;
+
+  // Global position
+  const sectionOrder = ['1','2','3','4'];
+  let globalIdx = 0;
+  sectionOrder.forEach(s => {
+    if (s < state.currentSection) globalIdx += state.sections[s].length;
+  });
+  globalIdx += state.currentQIndex;
+
+  const totalQ = state.questions.length;
+  const answeredCount = Object.keys(state.answers).length;
+
+  // Progress
+  document.getElementById('progressLabel').textContent = `Question ${globalIdx + 1} of ${totalQ}`;
+  document.getElementById('progressPct').textContent = `${Math.round((answeredCount / totalQ) * 100)}% answered`;
+  document.getElementById('progressBar').style.width = `${(answeredCount / totalQ) * 100}%`;
+
+  // Q counter & text
+  document.getElementById('qCounter').textContent =
+    `Section ${state.currentSection} of 4 — Question ${state.currentQIndex + 1} of ${sQuestions.length}`;
+  document.getElementById('qText').textContent = q.question;
+
+  // Options
+  const list = document.getElementById('optionsList');
+  list.innerHTML = '';
+  const selectedAnswer = state.answers[q.qid];
+  q.options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn' + (selectedAnswer === opt.key ? ' selected' : '');
+    btn.innerHTML = `<span class="opt-key">${opt.key}</span><span>${opt.text}</span>`;
+    btn.onclick = () => selectAnswer(q.qid, opt.key);
+    list.appendChild(btn);
+  });
+
+  // Dots navigation
+  const dots = document.getElementById('qNavDots');
+  dots.innerHTML = '';
+  sQuestions.forEach((sq, i) => {
+    const dot = document.createElement('button');
+    dot.className = 'q-dot';
+    if (state.answers[sq.qid]) dot.classList.add('answered');
+    if (i === state.currentQIndex) dot.classList.add('current');
+    dot.textContent = i + 1;
+    dot.onclick = () => jumpToQuestion(i);
+    dots.appendChild(dot);
+  });
+
+  // Prev/Next buttons
+  const isFirstQ = state.currentQIndex === 0;
+  const isLastSection = state.currentSection === '4';
+  const isLastQInSection = state.currentQIndex === sQuestions.length - 1;
+
+  document.getElementById('btnPrev').style.visibility = isFirstQ ? 'hidden' : 'visible';
+
+  const btnNext = document.getElementById('btnNext');
+  if (isLastSection && isLastQInSection) {
+    btnNext.innerHTML = '<i class="fa fa-paper-plane me-1"></i> Submit';
+    btnNext.style.background = 'var(--brand-accent)';
+    btnNext.style.color = '#1a1a1a';
+  } else if (isLastQInSection) {
+    btnNext.innerHTML = 'Next Section <i class="fa fa-arrow-right ms-1"></i>';
+    btnNext.style.background = '';
+    btnNext.style.color = '';
+  } else {
+    btnNext.innerHTML = 'Next <i class="fa fa-arrow-right ms-1"></i>';
+    btnNext.style.background = '';
+    btnNext.style.color = '';
+  }
+
+  updateSectionTabs();
+}
+
+function selectAnswer(qid, key) {
+  state.answers[qid] = key;
+  renderQuestion();
+}
+
+function jumpToQuestion(idx) {
+  state.currentQIndex = idx;
+  renderQuestion();
+}
+
+function prevQuestion() {
+  if (state.currentQIndex > 0) {
+    state.currentQIndex--;
+    renderQuestion();
+  }
+}
+
+function nextQuestion() {
+  const sQuestions = state.sections[state.currentSection];
+  const isLastQInSection = state.currentQIndex === sQuestions.length - 1;
+
+  if (isLastQInSection) {
+    if (state.currentSection === '4') {
+      // Show submit confirmation
+      const unanswered = state.questions.length - Object.keys(state.answers).length;
+      const msg = unanswered > 0
+        ? `You have ${unanswered} unanswered question(s). Unanswered questions will be marked incorrect. Submit anyway?`
+        : 'You have answered all questions. Are you ready to submit?';
+      document.getElementById('submitModalMsg').textContent = msg;
+      document.getElementById('submitModal').classList.add('show');
+    } else {
+      // Move to next section
+      const sectionOrder = ['1','2','3','4'];
+      const nextIdx = sectionOrder.indexOf(state.currentSection) + 1;
+      state.currentSection = sectionOrder[nextIdx];
+      state.currentQIndex = 0;
+      renderQuestion();
+    }
+  } else {
+    state.currentQIndex++;
+    renderQuestion();
+  }
+}
+
+function closeModal() {
+  document.getElementById('submitModal').classList.remove('show');
+}
+
+// ── Submit ─────────────────────────────────────────────────────
+function submitTest(autoSubmit = false) {
+  if (state.submitted) return;
+  state.submitted = true;
+  clearInterval(state.timer);
+  closeModal();
+  document.getElementById('timerBadge').style.display = 'none';
+  goTo('screen-submitting');
+
+  const timeTaken = (VERSIONS[state.version].minutes * 60) - state.secondsLeft;
+
+  const payload = {
+    action:    'submitTest',
+    civilId:   state.candidate.civilId,
+    name:      state.candidate.name,
+    email:     state.candidate.email,
+    phone:     state.candidate.phone,
+    version:   state.version,
+    timeTaken: timeTaken,
+    answers:   state.answers,
+    batchQIDs: state.batchQIDs
+  };
+
+  const body = `payload=${encodeURIComponent(JSON.stringify(payload))}`;
+
+  const doSubmit = () => fetch(SCRIPT_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body
+  }).then(r => r.json());
+
+  doSubmit()
+    .catch(() => new Promise(r => setTimeout(r, 600)).then(doSubmit))
+    .then(data => {
+      if (data.success) showResults(data);
+      else throw new Error(data.error);
+    })
+    .catch(err => {
+      // Show result locally if submission failed (rare)
+      showResults({ score: '?', maxScore: state.questions.length, pct: '?' });
+      console.error('Submission error:', err);
+    });
+}
+
+function showResults(data) {
+  document.getElementById('resultScore').textContent = `${data.score}/${data.maxScore}`;
+  document.getElementById('resultPct').textContent = `${data.pct}%`;
+  document.getElementById('resultName').textContent = state.candidate.name;
+  document.getElementById('resultVersion').textContent = VERSIONS[state.version].label;
+  goTo('screen-results');
+}
+
+// ── Init ──────────────────────────────────────────────────────
+(function init() {
+  // Nothing needed on load
+})();
+</script>
+</body>
+</html>
